@@ -4,8 +4,10 @@ application {
     mainClassName = 'SimpleGrabHttpURL'
     description = "SimpleGrabHttpURL Example"
 }
-
+if(!project.hasProperty('site')){
+  ext.site = 'https://devhints.io/bash'
+}
 run {
   // default arguments
-  args 'https://devhints.io/bash' // url
+  args project.site // url
 }

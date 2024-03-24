@@ -38,23 +38,39 @@ public class Fraction {
    }
 
    public static void main (String args[]) {
-      try {
-         // create a new instance
-         // Fraction *frac = [[Fraction alloc] init];
-         Fraction frac = new Fraction();
+       int numerator = 1; // Default value
+       int denominator = 3; // Default value
 
-         // set the values
-         frac.setNumerator(1);
-         frac.setDenominator(3);
+       for (String arg : args) {
+           if (arg.startsWith("num=")) {
+               try {
+                   numerator = Integer.parseInt(arg.substring(4));
+               } catch (NumberFormatException e) {
+                   System.err.println("Invalid number for numerator: " + arg);
+                   return;
+               }
+           } else if (arg.startsWith("denom=")) {
+               try {
+                   denominator = Integer.parseInt(arg.substring(6));
+               } catch (NumberFormatException e) {
+                   System.err.println("Invalid number for denominator: " + arg);
+                   return;
+               }
+           }
+       }
 
-         // print it
-         System.out.print("The fraction is: ");
-         frac.print();
-         System.out.println("");
+       try {
+           Fraction frac = new Fraction();
+           frac.setNumerator(numerator);
+           frac.setDenominator(denominator);
 
-      }catch(Exception e) {
-         e.printStackTrace();
-      }
+           System.out.print("The fraction is: ");
+           frac.print();
+           System.out.println("");
+
+       } catch (Exception e) {
+           e.printStackTrace();
+       }
    }
 }
 
