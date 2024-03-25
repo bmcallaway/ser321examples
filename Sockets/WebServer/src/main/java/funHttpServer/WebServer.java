@@ -316,10 +316,10 @@ class WebServer {
                 // Append more analysis results here
             }
             
-        }else if(request.contains("encrypt") || request.contains("decrypt")){
+        }else if(request.contains("encrypt?") || request.contains("decrypt?")){
             
-            boolean encrypting = request.contains("encrypt");
-            Map<String, String> query_pairs = splitQuery(request.replace(encrypting ? "encrypt" : "decrypt", ""));
+            boolean encrypting = request.contains("encrypt?");
+            Map<String, String> query_pairs = splitQuery(request.replace(encrypting ? "encrypt?" : "decrypt?", ""));
             String text = query_pairs.get("text");
             Integer shift = 0;
             
