@@ -273,7 +273,7 @@ class WebServer {
                       builder.append("Content-Type: text/html; charset=utf-8\n");
                       builder.append("\n");
                       builder.append("Repository Name: " + repo.getString("full_name"));
-                      builder.append("Description: " + repo.getString("id"));
+                      builder.append("ID: " + repo.getInt("id"));
                       builder.append("login: " + repo.getJSONObject("owner").getString("login"));
                   }
               }catch(JSONException e) {
@@ -291,8 +291,6 @@ class WebServer {
               builder.append("\n");
               builder.append("");
           }
-          
-
 
         } else {
           // if the request is not recognized at all
