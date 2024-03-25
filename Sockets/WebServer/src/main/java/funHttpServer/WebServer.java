@@ -298,6 +298,9 @@ class WebServer {
             Map<String, String> query_pairs = splitQuery(request.replace("textAnalysis?", ""));
             String text = query_pairs.get("text");
             try {
+                if (text != null) {
+                    text = URLDecoder.decode(text, "UTF-8");
+                }
                 if (text == null || text.isEmpty()) {
                     builder.append("HTTP/1.1 400 Bad Request\n");
                     builder.append("Content-Type: text/html; charset=utf-8\n");
