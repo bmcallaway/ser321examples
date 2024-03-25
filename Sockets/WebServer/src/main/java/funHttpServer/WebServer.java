@@ -275,6 +275,7 @@ class WebServer {
                       builder.append("Repository Name: " + repo.getString("full_name"));
                       builder.append(", ID: " + repo.getInt("id"));
                       builder.append(", login: " + repo.getJSONObject("owner").getString("login"));
+                      builder.append("\n");
                   }
               }catch(JSONException e) {
                   builder.append("HTTP/1.1 500 Internal Server Error\n");
