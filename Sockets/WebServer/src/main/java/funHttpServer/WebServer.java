@@ -266,15 +266,15 @@ class WebServer {
           if(query_pairs.get("query").matches("users/.+/repos")) {
               try {
                   JSONArray repos = new JSONArray(json);
+                  builder.append("HTTP/1.1 200 OK\n");
+                  builder.append("Content-Type: text/html; charset=utf-8\n");
+                  builder.append("\n");
                   for (int i = 0; i < repos.length(); i++) {
                       JSONObject repo = repos.getJSONObject(i);
                       
-                      builder.append("HTTP/1.1 200 OK\n");
-                      builder.append("Content-Type: text/html; charset=utf-8\n");
-                      builder.append("\n");
                       builder.append("Repository Name: " + repo.getString("full_name"));
-                      builder.append("ID: " + repo.getInt("id"));
-                      builder.append("login: " + repo.getJSONObject("owner").getString("login"));
+                      builder.append(", ID: " + repo.getInt("id"));
+                      builder.append(", login: " + repo.getJSONObject("owner").getString("login"));
                   }
               }catch(JSONException e) {
                   builder.append("HTTP/1.1 500 Internal Server Error\n");
