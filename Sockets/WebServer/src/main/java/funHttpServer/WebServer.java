@@ -22,6 +22,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Map;
 import java.util.LinkedHashMap;
 import java.nio.charset.Charset;
@@ -248,15 +253,44 @@ class WebServer {
 
           Map<String, String> query_pairs = new LinkedHashMap<String, String>();
           query_pairs = splitQuery(request.replace("github?", ""));
-          String json = fetchURL("https://api.github.com/" + query_pairs.get("query"));
-          System.out.println(json);
+          String json = "";
+          try {
+              json = fetchURL("https://api.github.com/" + query_pairs.get("query"));
+          }catch(Exception e) {
+              builder.append("HTTP/1.1 500 Internal Server Error\n");
+              builder.append("Content-Type: text/html; charset=utf-8\n");
+              builder.append("\n");
+              builder.append("Error fetching data from GitHub");
+          }
+          
+          if(query_pairs.get("query").matches("users/.+/repos")) {
+              try {
+                  JSONArray repos = new JSONArray(json);
+                  for (int i = 0; i < repos.length(); i++) {
+                      JSONObject repo = repos.getJSONObject(i);
+                      
+                      builder.append("HTTP/1.1 200 OK\n");
+                      builder.append("Content-Type: text/html; charset=utf-8\n");
+                      builder.append("\n");
+                      builder.append("Repository Name: " + repo.getString("full_name"));
+                      builder.append("Description: " + repo.getString("id"));
+                      builder.append("login: " + repo.getJSONObject("owner").getString("login"));
+                  }
+              }catch(JSONException e) {
+                  builder.append("HTTP/1.1 500 Internal Server Error\n");
+                  builder.append("Content-Type: text/html; charset=utf-8\n");
+                  builder.append("\n");
+                  builder.append("Error parsing JSON response");
+              }
+              
+          }else {
+              System.out.println(json);
 
-          builder.append("HTTP/1.1 200 OK\n");
-          builder.append("Content-Type: text/html; charset=utf-8\n");
-          builder.append("\n");
-          builder.append("Check the todos mentioned in the Java source file");
-          // TODO: Parse the JSON returned by your fetch and create an appropriate
-          // response based on what the assignment document asks for
+              builder.append("HTTP/1.1 200 OK\n");
+              builder.append("Content-Type: text/html; charset=utf-8\n");
+              builder.append("\n");
+              builder.append("");
+          }
 
         } else {
           // if the request is not recognized at all
