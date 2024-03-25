@@ -293,7 +293,68 @@ class WebServer {
               builder.append("Not yet implemented, try different request");
           }
 
-        } else {
+        }else if (request.contains("textAnalysis?")) {
+            
+            Map<String, String> query_pairs = splitQuery(request.replace("textAnalysis?", ""));
+            String text = query_pairs.get("text");
+
+            if (text == null || text.isEmpty()) {
+                builder.append("HTTP/1.1 400 Bad Request\n");
+                builder.append("Content-Type: text/html; charset=utf-8\n");
+                builder.append("\n");
+                builder.append("Error: Text parameter is missing or empty.");
+            } else {
+                // Perform analysis
+                int wordCount = text.split("\\s+").length;
+                int charCount = text.length();
+                
+                builder.append("HTTP/1.1 200 OK\n");
+                builder.append("Content-Type: text/html; charset=utf-8\n");
+                builder.append("\n");
+                builder.append("Word Count: ").append(wordCount).append("<br>");
+                builder.append("Character Count: ").append(charCount);
+                // Append more analysis results here
+            }
+            
+        }else if(request.contains("encrypt") || request.contains("decrypt")){
+            
+            boolean encrypting = request.contains("encrypt");
+            Map<String, String> query_pairs = new LinkedHashMap<String, String>();
+            query_pairs = splitQuery(request.replace(encrypting ? "encrypt" : "decrypt", ""));
+            String text = query_pairs.get("text");
+            Integer shift = 0;
+            
+            try {
+                shift = Integer.parseInt(query_pairs.get("shift"));
+                //if decrpyting invert number
+                if(!encrypting) {
+                    shift = -shift;
+                }
+            }catch(NumberFormatException e) {
+                
+                builder.append("HTTP/1.1 400 Bad Request\n");
+                builder.append("Content-Type: text/html; charset=utf-8\n");
+                builder.append("\n");
+                builder.append("Error: Invalid shift value.");
+            }
+            if(text == null || text.isEmpty()) {
+                
+                builder.append("HTTP/1.1 400 Bad Request\n");
+                builder.append("Content-Type: text/html; charset=utf-8\n");
+                builder.append("\n");
+                builder.append("Error: Text parameter is missing or empty.");
+            }else {
+                
+                String result = caesarCipher(text, shift);
+                builder.append("HTTP/1.1 200 OK\n");
+                builder.append("Content-Type: text/html; charset=utf-8\n");
+                builder.append("\n");
+                builder.append(encrypting ? "Encrypted" : "Decrypted").append(" Text: ").append(result);
+            }
+            
+        }
+        else {
+      
           // if the request is not recognized at all
 
           builder.append("HTTP/1.1 400 Bad Request\n");
@@ -312,7 +373,28 @@ class WebServer {
 
     return response;
   }
+  
+  public static String caesarCipher(String text, int shift) {
+      StringBuilder result = new StringBuilder();
 
+      int s = shift % 26; 
+
+      for (int i = 0; i < text.length(); i++) {
+          char ch = text.charAt(i);
+
+          if (Character.isUpperCase(ch)) {
+              char shifted = (char)(((ch - 'A' + s + 26) % 26) + 'A');
+              result.append(shifted);
+          } else if (Character.isLowerCase(ch)) {
+              char shifted = (char)(((ch - 'a' + s + 26) % 26) + 'a');
+              result.append(shifted);
+          } else {
+              result.append(ch); // Keeps the character unchanged if it's not a letter
+          }
+      }
+
+      return result.toString();
+  }
   /**
    * Method to read in a query and split it up correctly
    * @param query parameters on path
