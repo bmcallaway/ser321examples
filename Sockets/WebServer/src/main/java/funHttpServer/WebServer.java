@@ -209,12 +209,12 @@ class WebServer {
               builder.append("HTTP/1.1 400 Bad Request\n");
               builder.append("Content-Type: text/html; charset=utf-8\n");
               builder.append("\n");
-              builder.append("First number entered is not valid");
+              builder.append("Error: First number entered is not valid");
           }else if(!arg1.matches(regex)) {
               builder.append("HTTP/1.1 400 Bad Request\n");
               builder.append("Content-Type: text/html; charset=utf-8\n");
               builder.append("\n");
-              builder.append("Second number entered is not valid");
+              builder.append("Error: Second number entered is not valid");
           }else if(arg1.matches(regex) && arg0.matches(regex)) {
               try {
                   // extract required fields from parameters
@@ -228,10 +228,10 @@ class WebServer {
                   builder.append("\n");
                   builder.append("Result is: " + result);
               }catch(NumberFormatException e) {
-                  builder.append("HTTP/1.1 400 Bad Request\n");
+                  builder.append("HTTP/1.1 413 Value too large\n");
                   builder.append("Content-Type: text/html; charset=utf-8\n");
                   builder.append("\n");
-                  builder.append("Overflow likely");
+                  builder.append("Error: Overflow likely");
               } 
           }
           
