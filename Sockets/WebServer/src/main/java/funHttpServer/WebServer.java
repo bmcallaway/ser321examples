@@ -329,26 +329,28 @@ class WebServer {
                 if(!encrypting) {
                     shift = -shift;
                 }
+
+                if(text == null || text.trim().isEmpty()) {
+                    
+                    builder.append("HTTP/1.1 400 Bad Request\n");
+                    builder.append("Content-Type: text/html; charset=utf-8\n");
+                    builder.append("\n");
+                    builder.append("Error: Text parameter is missing or empty.");
+                    builder.append("Text: " + text);
+                }else {
+                    
+                    String result = caesarCipher(text, shift);
+                    builder.append("HTTP/1.1 200 OK\n");
+                    builder.append("Content-Type: text/html; charset=utf-8\n");
+                    builder.append("\n");
+                    builder.append(encrypting ? "Encrypted" : "Decrypted").append(" Text: ").append(result);
+                }
             }catch(NumberFormatException e) {
                 
                 builder.append("HTTP/1.1 400 Bad Request\n");
                 builder.append("Content-Type: text/html; charset=utf-8\n");
                 builder.append("\n");
                 builder.append("Error: Invalid shift value.");
-            }
-            if(text == null || text.isEmpty()) {
-                
-                builder.append("HTTP/1.1 400 Bad Request\n");
-                builder.append("Content-Type: text/html; charset=utf-8\n");
-                builder.append("\n");
-                builder.append("Error: Text parameter is missing or empty.");
-            }else {
-                
-                String result = caesarCipher(text, shift);
-                builder.append("HTTP/1.1 200 OK\n");
-                builder.append("Content-Type: text/html; charset=utf-8\n");
-                builder.append("\n");
-                builder.append(encrypting ? "Encrypted" : "Decrypted").append(" Text: ").append(result);
             }
             
         }
