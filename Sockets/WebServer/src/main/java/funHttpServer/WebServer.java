@@ -297,24 +297,29 @@ class WebServer {
             
             Map<String, String> query_pairs = splitQuery(request.replace("textAnalysis?", ""));
             String text = query_pairs.get("text");
-
-            if (text == null || text.isEmpty()) {
+            try {
+                if (text == null || text.isEmpty()) {
+                    builder.append("HTTP/1.1 400 Bad Request\n");
+                    builder.append("Content-Type: text/html; charset=utf-8\n");
+                    builder.append("\n");
+                    builder.append("Error: Text parameter is missing or empty.");
+                } else {
+                    int wordCount = text.split("\\s+").length;
+                    int charCount = text.length();
+                    
+                    builder.append("HTTP/1.1 200 OK\n");
+                    builder.append("Content-Type: text/html; charset=utf-8\n");
+                    builder.append("\n");
+                    builder.append("Word Count: ").append(wordCount).append("<br>");
+                    builder.append("Character Count: ").append(charCount);
+                }
+            }catch(Exception e) {
                 builder.append("HTTP/1.1 400 Bad Request\n");
                 builder.append("Content-Type: text/html; charset=utf-8\n");
                 builder.append("\n");
-                builder.append("Error: Text parameter is missing or empty.");
-            } else {
-                // Perform analysis
-                int wordCount = text.split("\\s+").length;
-                int charCount = text.length();
-                
-                builder.append("HTTP/1.1 200 OK\n");
-                builder.append("Content-Type: text/html; charset=utf-8\n");
-                builder.append("\n");
-                builder.append("Word Count: ").append(wordCount).append("<br>");
-                builder.append("Character Count: ").append(charCount);
-                // Append more analysis results here
+                builder.append("Error: Something Went Wrong");
             }
+            
             
         }else if(request.contains("encrypt?") || request.contains("decrypt?")){
             
@@ -336,7 +341,6 @@ class WebServer {
                     builder.append("Content-Type: text/html; charset=utf-8\n");
                     builder.append("\n");
                     builder.append("Error: Text parameter is missing or empty.");
-                    builder.append("Text: " + text);
                 }else {
                     
                     String result = caesarCipher(text, shift);
