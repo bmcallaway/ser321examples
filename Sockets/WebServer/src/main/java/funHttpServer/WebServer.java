@@ -291,6 +291,8 @@ class WebServer {
               builder.append("\n");
               builder.append("");
           }
+          
+
 
         } else {
           // if the request is not recognized at all
