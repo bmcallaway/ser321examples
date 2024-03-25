@@ -286,11 +286,11 @@ class WebServer {
               
           }else {
               System.out.println(json);
-
-              builder.append("HTTP/1.1 200 OK\n");
+              //When request is valid but I have not implemented the specific request
+              builder.append("HTTP/1.1 501 Not Implemented\n");
               builder.append("Content-Type: text/html; charset=utf-8\n");
               builder.append("\n");
-              builder.append("");
+              builder.append("Not yet implemented, try different request");
           }
 
         } else {
