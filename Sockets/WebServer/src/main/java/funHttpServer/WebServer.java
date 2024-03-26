@@ -251,75 +251,51 @@ class WebServer {
           // "Owner's repo is named RepoName. Example: find RepoName's contributors" translates to
           //     "/repos/OWNERNAME/REPONAME/contributors"
 
-          Map<String, String> query_pairs = new LinkedHashMap<String, String>();
-          query_pairs = splitQuery(request.replace("github?", ""));
-          String json = "";
-          try {
-              json = fetchURL("https://api.github.com/" + query_pairs.get("query"));
-          }catch(Exception e) {
-              builder.append("HTTP/1.1 500 Internal Server Error\n");
-              builder.append("Content-Type: text/html; charset=utf-8\n");
-              builder.append("\n");
-              builder.append("Error fetching data from GitHub");
-          }
-          
-          if(query_pairs.get("query").matches("users/.+/repos")) {
-              try {
-                  JSONArray repos = new JSONArray(json);
-                  builder.append("HTTP/1.1 200 OK\n");
-                  builder.append("Content-Type: text/html; charset=utf-8\n");
-                  builder.append("\n");
-                  for (int i = 0; i < repos.length(); i++) {
-                      JSONObject repo = repos.getJSONObject(i);
-                      
-                      builder.append("Repository Name: " + repo.getString("full_name"));
-                      builder.append(", ID: " + repo.getInt("id"));
-                      builder.append(", login: " + repo.getJSONObject("owner").getString("login"));
-                      builder.append("\n");
-                  }
-              }catch(JSONException e) {
-                  builder.append("HTTP/1.1 500 Internal Server Error\n");
-                  builder.append("Content-Type: text/html; charset=utf-8\n");
-                  builder.append("\n");
-                  builder.append("Error parsing JSON response");
-              }
-              
-          }else {
-              System.out.println(json);
-              //When request is valid but I have not implemented the specific request
-              builder.append("HTTP/1.1 501 Not Implemented\n");
-              builder.append("Content-Type: text/html; charset=utf-8\n");
-              builder.append("\n");
-              builder.append("Not yet implemented, try different request");
-          }
+            Map<String, String> query_pairs = splitQuery(request.replace("github?", ""));
+            String query = query_pairs.get("query");
 
-        }else if (request.contains("textAnalysis?")) {
-            
-            Map<String, String> query_pairs = splitQuery(request.replace("textAnalysis?", ""));
-            String text = query_pairs.get("text");
-            try {
-                if (text == null || text.isEmpty()) {
-                    builder.append("HTTP/1.1 400 Bad Request\n");
-                    builder.append("Content-Type: text/html; charset=utf-8\n");
-                    builder.append("\n");
-                    builder.append("Error: Text parameter is missing or empty.");
-                } else {
-                    int wordCount = text.split("\\s+").length;
-                    int charCount = text.length();
-                    
-                    builder.append("HTTP/1.1 200 OK\n");
-                    builder.append("Content-Type: text/html; charset=utf-8\n");
-                    builder.append("\n");
-                    builder.append("Word Count: ").append(wordCount).append("<br>");
-                    builder.append("Character Count: ").append(charCount);
-                }
-            }catch(Exception e) {
+            // Check if the 'query' parameter is present and not empty
+            if (query == null || query.isEmpty()) {
                 builder.append("HTTP/1.1 400 Bad Request\n");
-                builder.append("Content-Type: text/html; charset=utf-8\n");
-                builder.append("\n");
-                builder.append("Error: Something Went Wrong");
+                builder.append("Content-Type: text/html; charset=utf-8\n\n");
+                builder.append("Missing or invalid 'query' parameter.");
+            } else {
+                // Proceed with fetching and processing the GitHub API response
+                String json = "";
+                try {
+                    json = fetchURL("https://api.github.com/" + query);
+
+                    // Check specific API response pattern
+                    if (query.matches("users/.+/repos")) {
+                        try {
+                            JSONArray repos = new JSONArray(json);
+                            builder.append("HTTP/1.1 200 OK\n");
+                            builder.append("Content-Type: text/html; charset=utf-8\n\n");
+                            for (int i = 0; i < repos.length(); i++) {
+                                JSONObject repo = repos.getJSONObject(i);
+                                builder.append("Repository Name: ").append(repo.getString("full_name"))
+                                        .append(", ID: ").append(repo.getInt("id"))
+                                        .append(", login: ").append(repo.getJSONObject("owner").getString("login"))
+                                        .append("\n");
+                            }
+                        } catch (JSONException e) {
+                            builder.append("HTTP/1.1 500 Internal Server Error\n");
+                            builder.append("Content-Type: text/html; charset=utf-8\n\n");
+                            builder.append("Error parsing JSON response");
+                        }
+                    } else {
+                        // Valid but not implemented API request
+                        builder.append("HTTP/1.1 501 Not Implemented\n");
+                        builder.append("Content-Type: text/html; charset=utf-8\n\n");
+                        builder.append("Not yet implemented, try a different request");
+                    }
+                } catch (Exception e) {
+                    // Catch all exceptions from fetchURL or other operations
+                    builder.append("HTTP/1.1 500 Internal Server Error\n");
+                    builder.append("Content-Type: text/html; charset=utf-8\n\n");
+                    builder.append("Error fetching data from GitHub");
+                }
             }
-            
             
         }else if(request.contains("encrypt?") || request.contains("decrypt?")){
             
